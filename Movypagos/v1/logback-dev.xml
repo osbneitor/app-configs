@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true">
+	<!-- Appender que loguea asincronicamente a archivo, utilizado para debug -->
+
+
+	<appender class="ch.qos.logback.core.FileAppender" name="file">
+		<immediateFlush>true</immediateFlush>
+		<prudent>true</prudent>
+		<file>debug.log</file>
+		<encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+			<providers>
+				<mdc/>
+				<!-- MDC variables on the Thread will be written as JSON fields -->
+				<!--	<context />Outputs entries from logback's context -->
+				<!--	<version />Logstash json format version, the @version field in the output -->
+				<logLevel/>
+				<loggerName/>
+				<pattern>
+					<pattern>{
+						&quot;appName&quot;: &quot;ATM&quot;,
+						
+						<!--or searching with Kibana -->
+						&quot;appVersion&quot;: &quot;v1&quot;
+						}</pattern>
+				</pattern>
+				<threadName/>
+				<logstashMarkers/>
+				<!-- Useful so we can add extra information for specific log lines as Markers -->
+				<message/>
+				<!--	<arguments />or through StructuredArguments -->
+				<stackTrace/>
+			</providers>
+		</encoder>
+	</appender>
+	<appender class="ch.qos.logback.classic.AsyncAppender" name="AsyncFile">
+		<appender-ref ref="file"/>
+	</appender>
+	<!-- Appender que loguea en consola, utilizado para debug -->
+	<appender class="ch.qos.logback.core.ConsoleAppender" name="console">
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{0} - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+	<!-- Esto hace un override del nivel de logueo utilizado en las llamadas a BD -->
+	<logger level="TRACE" name="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<appender-ref ref="AsyncFile"/>
+		<appender-ref ref="console"/>
+	</logger>
+	<!-- Utilizado para loguear los HttpRequests y responses -->
+	<logger level="info" name="Prisma">
+		<appender-ref ref="AsyncFile"/>
+	</logger>
+	<root level="info" name="Prisma_root">
+		<appender-ref ref="console"/>
+	</root>
+	<root level="info">
+		<appender-ref ref="AsyncFile"/>
+		<appender-ref ref="console"/>
+	</root>
+</configuration>
